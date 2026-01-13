@@ -1,88 +1,66 @@
-import 'package:flame/components.dart';
-import 'package:flame/effects.dart';
-import 'package:flame/sprite.dart';
-import '../../world/invaders_world.dart';
-import 'strategies/shooting_strategy.dart';
-import 'strategies/timed_shooting_strategy.dart';
+// ignore_for_file: sort_constructors_first
 
-class Invader extends SpriteAnimationComponent with HasGameReference {
+import 'package:flame/components.dart';
+import 'strategies/shooting_strategy.dart';
+import '../../space_invaders_game.dart';
+
+class Invader extends SpriteComponent with HasGameReference<SpaceInvadersGame> {
+  final ShootingStrategy shootingStrategy;
+  double moveSpeed = 50;
+  double direction = 1;
+  double timeSinceLastMove = 0;
+  double moveInterval = 1.0;
   
   Invader({
     required super.position,
-    required this.world,
-  }) : super(size: Vector2(32, 32));
+    required super.size,
+    required this.shootingStrategy,
+  });
   
-final InvadersWorld world;
-  late ShootingStrategy shootingStrategy;
-  double _moveDirection = 1;
-  final double _moveSpeed = 40;
-  double _shotCooldown = 0;
-
   @override
   Future<void> onLoad() async {
-    await super.onLoad();
+    super.onLoad();
     
-    // Load spritesheet animation
-    final spriteSheet = SpriteSheet.fromColumnsAndRows(
-      image: await game.images.load('invader_sheet.png'),
-      columns: 2,
-      rows: 1,
-    );
+    // Alternate between two enemy sprites for variety
+    final spriteName = (position.x.toInt() + position.y.toInt()) % 2 == 0
+        ? 'space__0002_B1.png'
+        : 'space__0003_B2.png';
     
-    animation = spriteSheet.createAnimation(
-      row: 0,
-      from: 0,
-      to: 1,
-      stepTime: 0.5,
-    );
+    sprite = Sprite(game.images.fromCache(spriteName));
+    anchor = Anchor.center;
     
-    // Add move effect for bobbing animation
-    add(
-      MoveEffect.by(
-        Vector2(0, 5),
-        EffectController(
-          duration: 0.8,
-          alternate: true,
-          infinite: true,
-        ),
-      ),
-    );
-    
-    // Set shooting strategy
-    shootingStrategy = TimedShotStrategy(interval: 2.0 + (position.y / 100));
+    print('Invader loaded at position: $position');
   }
   
   @override
   void update(double dt) {
     super.update(dt);
     
-    // Horizontal movement
-    position.x += _moveDirection * _moveSpeed * dt;
+    timeSinceLastMove += dt;
     
-    // Check bounds for direction change
-    if (position.x <= 30 || position.x >= game.size.x - size.x - 30) {
-      _moveDirection *= -1;
-      position.y += 20; // Move down
+    // Move sideways
+    if (timeSinceLastMove >= moveInterval) {
+      position.x += moveSpeed * direction;
+      timeSinceLastMove = 0;
+      
+      // Reverse direction at screen edges
+      if (position.x <= size.x / 2 || position.x >= game.size.x - size.x / 2) {
+        direction *= -1;
+        position.y += 20; // Move down
+      }
     }
     
-    // Shooting logic using strategy pattern
-    _shotCooldown -= dt;
-    if (_shotCooldown <= 0 && shootingStrategy.shouldShoot()) {
+    // Check if should shoot
+    shootingStrategy.update(dt);
+    if (shootingStrategy.shouldShoot(dt)) {
       shoot();
-      _shotCooldown = shootingStrategy.getCooldown();
     }
   }
   
   void shoot() {
-    final projectile = world.projectilePool.acquire(
-      position: position + Vector2(size.x / 2 - 4, size.y + 10),
-      velocity: Vector2(0, 300),
-      isFromPlayer: false,
+    game.shootProjectile(
+      Vector2(position.x, position.y + size.y / 2),
+      true,
     );
-    world.add(projectile);
-  }
-  
-  void takeHit() {
-    world.removeInvader(this);
   }
 }

@@ -1,26 +1,19 @@
-import 'shooting_strategy.dart';
+// ignore_for_file: sort_constructors_first
+
 import 'dart:math';
+import 'shooting_strategy.dart';
 
-class RandomShotStrategy implements ShootingStrategy {
-
-  RandomShotStrategy({
-    this.probability = 0.01,
-    this.minCooldown = 1.0,
-    this.maxCooldown = 3.0,
-  });
+class RandomShotStrategy extends ShootingStrategy {
+  final Random random = Random();
+  final double chancePerSecond;
   
-  final Random _random = Random();
-  final double probability;
-  final double minCooldown;
-  final double maxCooldown;
-
+  RandomShotStrategy(this.chancePerSecond);
+  
   @override
-  bool shouldShoot() {
-    return _random.nextDouble() < probability;
+  bool shouldShoot(double dt) {
+    return random.nextDouble() < chancePerSecond * dt;
   }
   
   @override
-  double getCooldown() {
-    return minCooldown + _random.nextDouble() * (maxCooldown - minCooldown);
-  }
+  void update(double dt) {}
 }

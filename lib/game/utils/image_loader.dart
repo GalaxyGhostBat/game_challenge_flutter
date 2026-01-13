@@ -17,28 +17,28 @@ class ImageLoader {
       print('Loading images...');
       
       // Load player image
-      final playerImage = await Flame.images.load('player.png');
+      final playerImage = await Flame.images.load('ship.png');
       playerSprite = Sprite(playerImage);
-      print('✓ Loaded player.png');
+      print('✓ Loaded ship.png');
       
       // Load enemy images
-      final enemyImage1 = await Flame.images.load('space__0002_B1.png');
+      final enemyImage1 = await Flame.images.load('alien.png');
       enemySprite1 = Sprite(enemyImage1);
-      print('✓ Loaded space__0002_B1.png');
+      print('✓ Loaded alien.png');
       
-      final enemyImage2 = await Flame.images.load('space__0003_B2.png');
+      final enemyImage2 = await Flame.images.load('alien.png');
       enemySprite2 = Sprite(enemyImage2);
-      print('✓ Loaded space__0003_B2.png');
+      print('✓ Loaded alien.png');
       
       // Load projectile image
-      final projectileImage = await Flame.images.load('ProjectileB_1.png');
+      final projectileImage = await Flame.images.load('bullet.png');
       projectileSprite = Sprite(projectileImage);
-      print('✓ Loaded ProjectileB_1.png');
+      print('✓ Loaded bullet.png');
       
       // Load explosion image
-      final explosionImage = await Flame.images.load('space__0009_EnemyExplosion.png');
+      final explosionImage = await Flame.images.load('explosion.png');
       explosionSprite = Sprite(explosionImage);
-      print('✓ Loaded space__0009_EnemyExplosion.png');
+      print('✓ Loaded explosion.png');
       
       isInitialized = true;
       print('All images loaded successfully');

@@ -1,116 +1,54 @@
+// ignore_for_file: sort_constructors_first
+
 import 'dart:ui';
 import 'package:flame/components.dart';
-import 'package:flame/effects.dart';
-import 'package:flame/collisions.dart';
-import '../../world/invaders_world.dart';
-import '../player/player.dart';
-import '../enemy/invader.dart';
+import 'package:flutter/material.dart';
+import '../../space_invaders_game.dart';
 
-class Projectile extends PositionComponent with CollisionCallbacks {
+class Projectile extends SpriteComponent with HasGameReference<SpaceInvadersGame> {
+  Vector2 velocity; // Changed from final so pool can modify it
+  final bool isEnemy;
+  
   Projectile({
-    required Vector2 position,
+    required super.position,
     required this.velocity,
-    required this.isFromPlayer,
-    required this.world,
-  }) : super(position: position, size: Vector2(8, 20)) {
-    // Add hitbox
-    add(RectangleHitbox());
-  }
-
-  Vector2 velocity;
-  bool isFromPlayer;
-  bool isActive = true;
-  final InvadersWorld world;
+    required this.isEnemy,
+    required super.size,
+  });
   
   @override
   Future<void> onLoad() async {
-    await super.onLoad();
+    super.onLoad();
     
-    // Add trail effect
-    add(
-      OpacityEffect.fadeOut(
-        EffectController(
-          duration: 0.3,
-        ),
-        onComplete: () {
-          if (isActive) {
-            world.projectilePool.release(this);
-          }
-        },
-      ),
-    );
-  }
-  
-  void reset({required Vector2 position, required Vector2 velocity}) {
-    this.position = position;
-    this.velocity = velocity;
-    isActive = true;
+    // Load the projectile image
+    sprite = Sprite(game.images.fromCache('ProjectileB_1.png'));
+    anchor = Anchor.center;
   }
   
   @override
   void update(double dt) {
     super.update(dt);
     
-    if (!isActive) return;
-    
-    // Move projectile
     position += velocity * dt;
     
-    // Check bounds
-    if (position.y < -50 || position.y > world.game.size.y + 50) {
-      isActive = false;
-      world.projectilePool.release(this);
-    }
-  }
-  
-  @override
-  void onCollisionStart(Set<Vector2> intersectionPoints, PositionComponent other) {
-    super.onCollisionStart(intersectionPoints, other);
-    
-    if (!isActive) return;
-    
-    if (isFromPlayer && other is Invader) {
-      final invader = other;
-      invader.takeHit();
-      isActive = false;
-      world.projectilePool.release(this);
-    } else if (!isFromPlayer && other is Player) {
-      final player = other;
-      if (!player.isInvincible) {
-        player.takeHit();
-        isActive = false;
-        world.projectilePool.release(this);
-      }
+    // Remove if out of bounds
+    if (position.y < -size.y || position.y > (game.size.y) + size.y) {
+      removeFromParent();
     }
   }
   
   @override
   void render(Canvas canvas) {
-    // Draw projectile
+    // Change color based on owner
     final paint = Paint()
-      ..color = isFromPlayer ? const Color(0xFF00FFFF) : const Color(0xFFFF5555)
-      ..style = PaintingStyle.fill;
+      ..colorFilter = ColorFilter.mode(
+        isEnemy ? const Color(0xFFFF0000) : const Color(0xFF00FF00),
+        BlendMode.srcATop,
+      );
     
-    // Custom shape for projectile
-    final path = Path()
-      ..moveTo(size.x / 2, 0)
-      ..lineTo(size.x, size.y * 0.7)
-      ..lineTo(size.x / 2, size.y)
-      ..lineTo(0, size.y * 0.7)
-      ..close();
-    
-    canvas.drawPath(path, paint);
-    
-    // Add glow effect
-    final glowPaint = Paint()
-      ..color = (isFromPlayer ? const Color(0xFF00FFFF) : const Color(0xFFFF5555))
-          .withAlpha(0x30)
-      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3);
-    
-    canvas.drawCircle(
-      Offset(size.x / 2, size.y / 2),
-      size.x / 1.5,
-      glowPaint,
-    );
+    canvas.save();
+    canvas.drawRect(size.toRect(), paint);
+    super.render(canvas);
+    canvas.restore();
   }
 }

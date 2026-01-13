@@ -1,131 +1,109 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import '../bloc/game_bloc.dart';
-import '../bloc/game_event.dart';
 import '../bloc/game_state.dart';
 
 class HUD extends StatelessWidget {
-  const HUD({super.key});
-
+  final GameState state;
+  final VoidCallback onReset;
+  
+  const HUD({
+    Key? key,  // Added Key parameter
+    required this.state,
+    required this.onReset,
+  }) : super(key: key);
+  
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<GameBloc, GameState>(
-      builder: (context, state) {
-        return Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+    final score = state is GameRunning ? (state as GameRunning).score : 0;
+    final lives = state is GameRunning ? (state as GameRunning).lives : 3;
+    final isGameOver = state is GameRunning ? (state as GameRunning).isGameOver : false;
+    final hasWon = state is GameRunning ? (state as GameRunning).hasWon : false;
+    
+    return Stack(
+      children: [
+        // Score
+        Positioned(
+          top: 20,
+          left: 20,
+          child: Text(
+            'Score: $score',
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 24,
+              fontFamily: 'PressStart2P',
+            ),
+          ),
+        ),
+        
+        // Lives
+        Positioned(
+          top: 20,
+          right: 20,
+          child: Row(
             children: [
-              // Score and Lives
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              const Text(
+                'Lives: ',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                  fontFamily: 'PressStart2P',
+                ),
+              ),
+              ...List.generate(lives, (index) => const Padding(
+                padding: EdgeInsets.only(left: 5),
+                child: Icon(
+                  Icons.favorite,
+                  color: Colors.red,
+                  size: 24,
+                ),
+              )),
+            ],
+          ),
+        ),
+        
+        // Game Over Overlay
+        if (isGameOver)
+          Container(
+            color: Colors.black.withAlpha(150),
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    'SCORE: ${state.score.toString().padLeft(6, '0')}',
+                    hasWon ? 'YOU WIN!' : 'GAME OVER',
                     style: const TextStyle(
-                      fontSize: 24,
-                      color: const Color(0xFF00FFFF),
-                      fontFamily: 'Courier',
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1.5,
+                      color: Colors.white,
+                      fontSize: 48,
+                      fontFamily: 'PressStart2P',
                     ),
                   ),
-                  Row(
-                    children: [
-                      const Text(
-                        'LIVES: ',
-                        style: const TextStyle(
-                          fontSize: 24,
-                          color: Colors.white,
-                          fontFamily: 'Courier',
-                          fontWeight: FontWeight.bold,
-                        ),
+                  const SizedBox(height: 20),
+                  Text(
+                    'Final Score: $score',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 24,
+                      fontFamily: 'PressStart2P',
+                    ),
+                  ),
+                  const SizedBox(height: 30),
+                  ElevatedButton(
+                    onPressed: onReset,
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                    ),
+                    child: const Text(
+                      'PLAY AGAIN',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontFamily: 'PressStart2P',
                       ),
-                      ...List.generate(
-                        state.lives,
-                        (index) => const Padding(
-                          padding: const EdgeInsets.only(left: 5),
-                          child: Icon(
-                            Icons.favorite,
-                            color: const Color(0xFFFF5555),
-                            size: 28,
-                          ),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
                 ],
               ),
-              
-              const Spacer(),
-              
-              // Game Over/Win Screen
-              if (state.isGameOver)
-                Center(
-                  child: Container(
-                    padding: const EdgeInsets.all(30),
-                    decoration: BoxDecoration(
-                      color: Colors.black.withAlpha(150),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: state.hasWon ? Colors.green : Colors.red,
-                        width: 3,
-                      ),
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          state.hasWon ? 'VICTORY!' : 'GAME OVER',
-                          style: TextStyle(
-                            fontSize: 48,
-                            color: state.hasWon ? Colors.green : Colors.red,
-                            fontFamily: 'Courier',
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 2,
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-                        Text(
-                          'FINAL SCORE: ${state.score}',
-                          style: const TextStyle(
-                            fontSize: 28,
-                            color: Colors.white,
-                            fontFamily: 'Courier',
-                          ),
-                        ),
-                        const SizedBox(height: 30),
-                        ElevatedButton(
-                          onPressed: () {
-                            context.read<GameBloc>().add(ResetGame());
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF00AAFF),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 50,
-                              vertical: 15,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                          child: const Text(
-                            'PLAY AGAIN',
-                            style: const TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-            ],
+            ),
           ),
-        );
-      },
+      ],
     );
   }
 }

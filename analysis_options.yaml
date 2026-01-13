@@ -1,4 +1,6 @@
 analyzer:
+  errors:
+    sort_constructors_first: ignore
   language:
     strict-casts: true
     strict-inference: true

@@ -5,18 +5,17 @@ class AssetLoader {
   static Future<void> loadAllAssets() async {
     // Load images
     await Flame.images.loadAll([
-      'player.png',
-      'ProjectileB_1.png',
-      'space__0002_B1.png',
-      'space__0003_B2.png',
-      'space__0009_EnemyExplosion.png',
+      'ship.png',
+      'bullet.png',
+      'alien.png',
+      'explosion.png',
     ]);
     
     // Load audio
     await FlameAudio.audioCache.loadAll([
       'explosion.wav',
       'shoot.wav',
-      'spaceinvaders1.mpeg',
+      'background.mp3',
     ]);
   }
   
@@ -24,6 +23,6 @@ class AssetLoader {
     // Preload audio for faster playback
     await FlameAudio.audioCache.load('explosion.wav');
     await FlameAudio.audioCache.load('shoot.wav');
-    await FlameAudio.audioCache.load('spaceinvaders1.mpeg');
+    await FlameAudio.audioCache.load('background.mp3');
   }
 }

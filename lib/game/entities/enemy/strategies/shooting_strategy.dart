@@ -1,5 +1,4 @@
-// Strategy Pattern Interface
 abstract class ShootingStrategy {
-  bool shouldShoot();
-  double getCooldown();
+  void update(double dt);
+  bool shouldShoot(double dt);
 }

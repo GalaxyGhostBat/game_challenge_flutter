@@ -13,10 +13,13 @@ class GameBloc extends Bloc<GameEvent, GameState> {
           emit(currentState.copyWith(
             lives: 0,
             isGameOver: true,
+            hasWon: false,
           ));
         } else {
           emit(currentState.copyWith(lives: newLives));
         }
+      } else {
+        emit(const GameRunning(score: 0, lives: 2, isGameOver: false, hasWon: false));
       }
     });
     
@@ -25,7 +28,7 @@ class GameBloc extends Bloc<GameEvent, GameState> {
         final currentState = state as GameRunning;
         emit(currentState.copyWith(score: currentState.score + 100));
       } else {
-        emit(const GameRunning(score: 100, lives: 3));
+        emit(const GameRunning(score: 100, lives: 3, isGameOver: false, hasWon: false));
       }
     });
     
