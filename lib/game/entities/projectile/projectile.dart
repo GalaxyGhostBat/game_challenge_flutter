@@ -39,16 +39,15 @@ class Projectile extends SpriteComponent with HasGameReference<SpaceInvadersGame
   
   @override
   void render(Canvas canvas) {
-    // Tint the sprite based on owner by compositing a layer with a color filter.
+    // Change color based on owner
     final paint = Paint()
       ..colorFilter = ColorFilter.mode(
         isEnemy ? const Color(0xFFFF0000) : const Color(0xFF00FF00),
         BlendMode.srcATop,
       );
-
-    // Create a layer using the paint so the sprite rendered by super.render
-    // is tinted when the layer is composited back to the canvas.
-    canvas.saveLayer(size.toRect(), paint);
+    
+    canvas.save();
+    canvas.drawRect(size.toRect(), paint);
     super.render(canvas);
     canvas.restore();
   }
