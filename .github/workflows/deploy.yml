@@ -1,3 +1,44 @@
+name: Build and deploy Flutter Web to GitHub Pages
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 'stable'
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build web
+        run: flutter build web --release
+
+      - name: Adjust base href for GitHub Pages
+        env:
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: |
+          REPO_NAME="${GITHUB_REPOSITORY##*/}"
+          FILE=build/web/index.html
+          if [ -f "$FILE" ]; then
+            sed -i "s|<base href=\"/\">|<base href=\"/$REPO_NAME/\">|" "$FILE" || true
+          fi
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: build/web
 name: Deploy to GitHub Pages
 
 on:
