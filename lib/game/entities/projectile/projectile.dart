@@ -21,7 +21,7 @@ class Projectile extends SpriteComponent with HasGameReference<SpaceInvadersGame
     super.onLoad();
     
     // Load the projectile image
-    sprite = Sprite(game.images.fromCache('ProjectileB_1.png'));
+    sprite = Sprite(game.images.fromCache('bullet.png'));
     anchor = Anchor.center;
   }
   

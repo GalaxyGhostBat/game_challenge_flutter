@@ -6,14 +6,17 @@ import 'shooting_strategy.dart';
 class RandomShotStrategy extends ShootingStrategy {
   final Random random = Random();
   final double chancePerSecond;
-  
+
   RandomShotStrategy(this.chancePerSecond);
-  
+
   @override
   bool shouldShoot(double dt) {
+    // probability per frame: chancePerSecond * dt
     return random.nextDouble() < chancePerSecond * dt;
   }
-  
+
   @override
-  void update(double dt) {}
+  void update(double dt) {
+    // nothing needed for now
+  }
 }

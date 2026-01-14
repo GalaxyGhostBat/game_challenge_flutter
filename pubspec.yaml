@@ -28,4 +28,5 @@ flutter:
     - assets/images/ship.png
     - assets/images/bullet.png
     - assets/images/alien.png
+    - assets/images/alien_2.png
     - assets/images/explosion.png

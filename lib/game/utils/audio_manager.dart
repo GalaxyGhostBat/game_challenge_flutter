@@ -42,8 +42,10 @@ class AudioManager {
   static void playBackgroundMusic() {
     if (!isInitialized) return;
     try {
+      print('AudioManager: playing background music');
       FlameAudio.bgm.stop();
       FlameAudio.bgm.play('background.mp3', volume: 0.3);
+      print('AudioManager: background music play called');
     } catch (e) {
       print('Error playing background music: $e');
     }
@@ -51,6 +53,7 @@ class AudioManager {
   
   static void stopBackgroundMusic() {
     try {
+      print('AudioManager: stopping background music');
       FlameAudio.bgm.stop();
     } catch (e) {
       print('Error stopping background music: $e');
@@ -59,6 +62,7 @@ class AudioManager {
   
   static void pauseBackgroundMusic() {
     try {
+      print('AudioManager: pausing background music');
       FlameAudio.bgm.pause();
     } catch (e) {
       print('Error pausing background music: $e');
@@ -67,6 +71,7 @@ class AudioManager {
   
   static void resumeBackgroundMusic() {
     try {
+      print('AudioManager: resuming background music');
       FlameAudio.bgm.resume();
     } catch (e) {
       print('Error resuming background music: $e');

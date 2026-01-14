@@ -1,62 +1,55 @@
 // ignore_for_file: sort_constructors_first
 
 import 'package:flame/components.dart';
-import 'strategies/shooting_strategy.dart';
 import '../../space_invaders_game.dart';
+import 'strategies/shooting_strategy.dart';
 
-class Invader extends SpriteComponent with HasGameReference<SpaceInvadersGame> {
+class Invader extends SpriteAnimationComponent with HasGameReference<SpaceInvadersGame> {
   final ShootingStrategy shootingStrategy;
-  double moveSpeed = 50;
-  double direction = 1;
-  double timeSinceLastMove = 0;
-  double moveInterval = 1.0;
-  
+
   Invader({
     required super.position,
     required super.size,
     required this.shootingStrategy,
-  });
-  
+  }) : super(anchor: Anchor.center);
+
   @override
   Future<void> onLoad() async {
-    super.onLoad();
-    
-    // Alternate between two enemy sprites for variety
-    final spriteName = (position.x.toInt() + position.y.toInt()) % 2 == 0
-        ? 'space__0002_B1.png'
-        : 'space__0003_B2.png';
-    
-    sprite = Sprite(game.images.fromCache(spriteName));
-    anchor = Anchor.center;
-    
-    print('Invader loaded at position: $position');
+    await super.onLoad();
+
+    final img1 = game.images.fromCache('alien.png');
+    final img2 = game.images.fromCache('alien_2.png');
+
+    final sprite1 = Sprite(img1);
+    final sprite2 = Sprite(img2);
+
+    animation = SpriteAnimation.spriteList(
+      [sprite1, sprite2],
+      stepTime: 0.5,
+      loop: true,
+    );
   }
-  
+
   @override
   void update(double dt) {
     super.update(dt);
-    
-    timeSinceLastMove += dt;
-    
-    // Move sideways
-    if (timeSinceLastMove >= moveInterval) {
-      position.x += moveSpeed * direction;
-      timeSinceLastMove = 0;
-      
-      // Reverse direction at screen edges
-      if (position.x <= size.x / 2 || position.x >= game.size.x - size.x / 2) {
-        direction *= -1;
-        position.y += 20; // Move down
-      }
-    }
-    
-    // Check if should shoot
+
+    // Shooting logic only
     shootingStrategy.update(dt);
-    if (shootingStrategy.shouldShoot(dt)) {
+
+    // Only shoot if this invader is the bottom in its column
+    if (_isBottomInvader() && shootingStrategy.shouldShoot(dt)) {
       shoot();
     }
   }
-  
+
+  bool _isBottomInvader() {
+    return !game.invaders.any((other) =>
+        other != this &&
+        (other.position.x - position.x).abs() < size.x * 0.5 &&
+        other.position.y > position.y);
+  }
+
   void shoot() {
     game.shootProjectile(
       Vector2(position.x, position.y + size.y / 2),
